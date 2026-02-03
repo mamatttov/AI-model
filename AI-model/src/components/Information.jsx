@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-
+import Translation from "./Translation";
+import Transcription from "./Transcription";
 export default function Information() {
   const [tab, setTab] = useState("transcription");
   return (
@@ -10,7 +11,7 @@ export default function Information() {
       <div className="grid grid-cols-2 items-center mx-auto bg-white   overflow-hidden rounded-full shadow ">
         <button
           onClick={() => {
-            setTab("translation");
+            setTab("transcription");
           }}
           className={
             "px-4 py-2 font-medium duration-500 " +
@@ -23,7 +24,7 @@ export default function Information() {
         </button>
         <button
           onClick={() => {
-            setTab("transcription");
+            setTab("translation");
           }}
           className={
             "px-4 py-2 font-medium duration-500" +
@@ -35,6 +36,7 @@ export default function Information() {
           Translation
         </button>
       </div>
+      {tab === "transcription" ? <Transcription /> : <Translation />}
     </main>
   );
 }

@@ -9,13 +9,76 @@ function App() {
   const [file, setFile] = useState(null);
   const [audioStream, setAudioStream] = useState(null);
   const isAudioAvailable = file || audioStream;
-  const [output, setOutput] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [output, setOutput] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   function handleAudioReset() {
     setFile(null);
     setAudioStream(null);
   }
+  const worker = useRef(null);
+  useEffect(() => {
+    if (!worker.current) {
+      worker.current = new Worker(
+        new URL("./utils/whisper.worker.js", import.meta.url),
+        {
+          type: "module",
+        },
+      );
+    }
+    const onMessageReceived = async () => {
+      switch (e.data.type) {
+        case "DOWNLOADING": {
+          setDownloading(true);
+          console.log("DOWNLOADING");
+          break;
+        }
+        case "LOADING": {
+          setDownloading(true);
+          console.log("LOADING");
+          break;
+        }
+        case "RESULT": {
+          setOutput(e.data.results);
+          break;
+        }
+        case "INFERENCE_DONE": {
+          setFinished(true);
+          console.log("DONE");
+          break;
+        }
+      }
+    };
+    worker.current.addEventListener("message", onMessageReceived);
+    return () => {
+      worker.current.removeEventListener("message", onMessageReceived);
+    };
+  }, []);
+  async function readAudioFrom(file) {
+    const sampling_rate = 16000;
+    const audioCTX = new AudioContext({ sampleRate: sampling_rate });
+    const response = await file.arrayBuffer();
+    const decoded = await audioCTX.decodeAudioData(response);
+    const audio = decoded.getChannelData(0);
+    return audio;
+  }
+
+  async function handleFormSubmition(params) {
+    if (!file && !audioStream) {
+      return;
+    }
+    let audio = readAudioFrom(file ? file : audioStream);
+    const model_name = "openai/whisper-tiny.en";
+
+    worker.current.postMessage({
+      type: MessageTypes.INFERENCE_REQUEST,
+      audio,
+      model_name,
+    });
+  }
+
   useEffect(() => {
     console.log(audioStream);
   }, [audioStream]);
