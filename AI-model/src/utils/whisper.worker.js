@@ -136,4 +136,18 @@ class GenerationTracker {
     };
   }
 }
-sadasdasgsdf;
+function createResultMessage(results, isDone, completedUntilTimestamp) {
+  self.postMessage({
+    type: MessageTypes.RESULT,
+    results,
+    isDone,
+    completedUntilTimestamp,
+  });
+}
+
+function createPartialResultMessage(result) {
+  self.postMessage({
+    type: MessageTypes.RESULT_PARTIAL,
+    result,
+  });
+}
