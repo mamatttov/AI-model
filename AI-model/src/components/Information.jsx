@@ -21,7 +21,17 @@ export default function Information(props) {
     element.click();
   }
 
-  function generateTranslation() {}
+  function generateTranslation() {
+    if (translating || toLanguage === "Select language") {
+      return;
+    }
+    setTranslating(true);
+    Worker.current.postMessage({
+      text: output.map((val) => val.text),
+      src_language: "eng_latin",
+      tgt_lang: toLanguage,
+    });
+  }
 
   const textElement =
     tab === "transcription" ? output.map((val) => val.text) : "";
@@ -69,9 +79,7 @@ export default function Information(props) {
             toLanguage={toLanguage}
             setToLanguage={setToLanguage}
             translating={translating}
-            setTranslating={setTranslating}
-            translation={translation}
-            setTranslation={setTranslation}
+            generateTranslation={generateTranslation}
           />
         )}
       </div>
