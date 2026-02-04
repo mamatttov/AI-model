@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function FileDisplay(props) {
-  const { file, audioStream, handleAudioReset } = props;
+  const { file, audioStream, handleAudioReset, handleFormSubmition } = props;
   return (
     <main className="flex-1 flex flex-col justify-center text-center sm:w-96 gap-3 sm:gap-4 pb-20  p-4  w-72 max-w-full mx-auto">
       <h1 className="font-semibold text-5xl sm:text-5xl md:text-6xl ">
@@ -18,7 +18,10 @@ export default function FileDisplay(props) {
         >
           Reset
         </button>
-        <button className="specialBtn p-2 rounded-lg font-medium text-blue-400 flex gap-2 items-center">
+        <button
+          onClick={handleFormSubmition}
+          className="specialBtn p-2 rounded-lg font-medium text-blue-400 flex gap-2 items-center"
+        >
           <p>Transcribe</p>
           <i className="fa-solid fa-file-pen"></i>
         </button>

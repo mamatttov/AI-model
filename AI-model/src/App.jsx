@@ -4,6 +4,7 @@ import HomePage from "./components/HomePage";
 import { useState, useEffect, useRef } from "react";
 import Information from "./components/Information";
 import Transcribing from "./components/Transcirbing";
+import { MessageTypes } from "./utils/presets";
 import "./index.css";
 function App() {
   const [file, setFile] = useState(null);
@@ -28,7 +29,7 @@ function App() {
         },
       );
     }
-    const onMessageReceived = async () => {
+    const onMessageReceived = async (e) => {
       switch (e.data.type) {
         case "DOWNLOADING": {
           setDownloading(true);
@@ -42,6 +43,7 @@ function App() {
         }
         case "RESULT": {
           setOutput(e.data.results);
+          console.log(e.data.results);
           break;
         }
         case "INFERENCE_DONE": {
@@ -65,11 +67,11 @@ function App() {
     return audio;
   }
 
-  async function handleFormSubmition(params) {
+  async function handleFormSubmition() {
     if (!file && !audioStream) {
       return;
     }
-    let audio = readAudioFrom(file ? file : audioStream);
+    let audio = await readAudioFrom(file ? file : audioStream);
     const model_name = "openai/whisper-tiny.en";
 
     worker.current.postMessage({
@@ -92,6 +94,7 @@ function App() {
           <Transcribing />
         ) : isAudioAvailable ? (
           <FileDisplay
+            handleFormSubmition={handleFormSubmition}
             handleAudioReset={handleAudioReset}
             file={file}
             audioStream={audioStream}
