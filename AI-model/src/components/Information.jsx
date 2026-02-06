@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Translation from "./Translation";
 import Transcription from "./Transcription";
 export default function Information(props) {
@@ -7,9 +7,49 @@ export default function Information(props) {
   const [translation, setTranslation] = useState(null);
   const [translating, setTranslating] = useState(null);
   const [toLanguage, setToLanguage] = useState("Select language");
+  console.log(output);
+
+  const worker = useRef();
+
+  useEffect(() => {
+    if (!worker.current) {
+      worker.current = new Worker(
+        new URL("../utils/translate.worker.js", import.meta.url),
+        {
+          type: "module",
+        },
+      );
+    }
+    const onMessageReceived = async (e) => {
+      switch (e.data.status) {
+        case "initiate": {
+          console.log("DOWNLOADING");
+          break;
+        }
+        case "progress": {
+          console.log("LOADING");
+          break;
+        }
+        case "update": {
+          setTranslation(e.data.output);
+          console.log(e.data.output);
+          break;
+        }
+        case "complete": {
+          setTranslating(false);
+          console.log("DONE");
+          break;
+        }
+      }
+    };
+    worker.current.addEventListener("message", onMessageReceived);
+    return () => {
+      worker.current.removeEventListener("message", onMessageReceived);
+    };
+  }, []);
 
   function handleCopy() {
-    navigator.clipboard.writeText(output.text);
+    navigator.clipboard.writeText(output.map((v) => v.text).join("\n"));
   }
 
   function handleDownload() {
@@ -22,19 +62,22 @@ export default function Information(props) {
   }
 
   function generateTranslation() {
-    if (translating || toLanguage === "Select language") {
+    if (!translating || toLanguage === "Select language") {
       return;
     }
     setTranslating(true);
-    Worker.current.postMessage({
+
+    worker.current.postMessage({
       text: output.map((val) => val.text),
-      src_language: "eng_latin",
+      src_lang: "eng_Latn",
       tgt_lang: toLanguage,
     });
   }
 
   const textElement =
-    tab === "transcription" ? output.map((val) => val.text) : "";
+    tab === "transcription"
+      ? output.map((val) => val.text)
+      : translation || "No translation";
 
   return (
     <main className="flex-1 flex flex-col justify-center text-center gap-3 sm:gap-4 pb-20  p-4 max-w-prose w-full mx-auto">

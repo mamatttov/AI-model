@@ -5,27 +5,28 @@ export default function Translation(props) {
   const {
     textElement,
     toLanguage,
-    setToLanguage,
     translating,
+    setToLanguage,
     generateTranslation,
   } = props;
   return (
-    <div className="flex flex-col gap-2 max-w-[400px] w-full mx-auto">
+    <>
+      {textElement && !translating && <p>{textElement}</p>}
       {!translating && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 mb-4">
           <p className="text-xs sm:text-sm font-medium text-slate-500 mr-auto">
-            to language
+            To language
           </p>
-          <div className="flex items-stretch gap-2">
+          <div className="flex items-stretch gap-2 sm:gap-4">
             <select
-              className="flex-1 bg-white border-blue-200 border-solid border hover:border-blue-500 duration-200 focus:outline-none outline-none px-3 rounded p-2"
               value={toLanguage}
+              className="flex-1 outline-none w-full focus:outline-none bg-white duration-200 p-2  rounded"
               onChange={(e) => setToLanguage(e.target.value)}
             >
               <option value={"Select language"}>Select language</option>
               {Object.entries(LANGUAGES).map(([key, value]) => {
                 return (
-                  <option value={value} key={key}>
+                  <option key={key} value={value}>
                     {key}
                   </option>
                 );
@@ -40,12 +41,6 @@ export default function Translation(props) {
           </div>
         </div>
       )}
-      {textElement && !translating && <p>{textElement}</p>}
-      {translating && (
-        <div className="grid p[lace-items-center">
-          <i className="fa-solid fa-spinner animate-spin"></i>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
